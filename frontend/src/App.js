@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
+import Workspaces from "./pages/Workspaces";
+import WorkspaceDetail from "./pages/WorkspaceDetail";
 import Leads from "./pages/Leads";
 import LeadDetail from "./pages/LeadDetail";
 import Conversations from "./pages/Conversations";
@@ -71,6 +73,8 @@ function App() {
           }>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="workspaces" element={<Workspaces />} />
+            <Route path="workspace/:workspaceId" element={<WorkspaceDetail />} />
             <Route path="leads" element={<Leads />} />
             <Route path="leads/:leadId" element={<LeadDetail />} />
             <Route path="conversations" element={<Conversations />} />

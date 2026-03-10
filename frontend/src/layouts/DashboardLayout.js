@@ -13,13 +13,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Bot,
-  Zap
+  Zap,
+  Briefcase
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { ScrollArea } from '../components/ui/scroll-area';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/workspaces', icon: Briefcase, label: 'Workspaces' },
   { path: '/leads', icon: Users, label: 'Leads' },
   { path: '/conversations', icon: MessageSquare, label: 'Conversations' },
   { path: '/statements', icon: FileText, label: 'Statements' },

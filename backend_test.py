@@ -145,13 +145,73 @@ class AutoMerchantAPITester:
 
         return self.run_test("Auth Me", "GET", "auth/me", 200)
 
+    def test_get_industries(self):
+        """Test industry templates endpoint"""
+        return self.run_test("Get Industries", "GET", "industries", 200)
+
+    def test_create_workspace(self):
+        """Test workspace creation"""
+        if not self.token:
+            self.log_result("Create Workspace", False, "No token available")
+            return False, {}
+
+        workspace_data = {
+            "name": "Test Restaurant Workspace",
+            "industry": "restaurant",
+            "description": "Test workspace for restaurant campaign",
+            "target_locations": ["Miami, FL", "Los Angeles, CA"],
+            "lead_sources": ["google_maps", "yelp"]
+        }
+
+        success, response = self.run_test(
+            "Create Workspace",
+            "POST",
+            "workspaces",
+            200,
+            data=workspace_data
+        )
+        
+        if success and 'id' in response:
+            self.workspace_id = response['id']
+        return success, response
+
+    def test_get_workspaces(self):
+        """Test workspace listing"""
+        if not self.token:
+            self.log_result("Get Workspaces", False, "No token available")
+            return False, {}
+
+        return self.run_test("Get Workspaces", "GET", "workspaces", 200)
+
+    def test_get_workspace_detail(self):
+        """Test workspace detail endpoint"""
+        if not self.token:
+            self.log_result("Get Workspace Detail", False, "No token available")
+            return False, {}
+
+        if not hasattr(self, 'workspace_id'):
+            self.log_result("Get Workspace Detail", False, "No workspace ID available")
+            return False, {}
+
+        return self.run_test(
+            "Get Workspace Detail", 
+            "GET", 
+            f"workspaces/{self.workspace_id}", 
+            200
+        )
+
     def test_create_lead(self):
-        """Test lead creation"""
+        """Test lead creation with workspace"""
         if not self.token:
             self.log_result("Create Lead", False, "No token available")
             return False, {}
 
+        if not hasattr(self, 'workspace_id'):
+            self.log_result("Create Lead", False, "No workspace ID available")
+            return False, {}
+
         lead_data = {
+            "workspace_id": self.workspace_id,
             "business_name": "Test Restaurant",
             "owner_name": "John Doe",
             "phone": "+1234567890",
@@ -184,16 +244,20 @@ class AutoMerchantAPITester:
 
         return self.run_test("List Leads", "GET", "leads", 200)
 
-    def test_generate_leads(self):
-        """Test AI lead generation"""
+    def test_discovery_generate(self):
+        """Test AI lead discovery engine"""
         if not self.token:
-            self.log_result("Generate Leads", False, "No token available")
+            self.log_result("Discovery Generate", False, "No token available")
+            return False, {}
+
+        if not hasattr(self, 'workspace_id'):
+            self.log_result("Discovery Generate", False, "No workspace ID available")
             return False, {}
 
         return self.run_test(
-            "Generate Leads",
+            "Discovery Generate",
             "POST",
-            "leads/generate?city=Miami&state=FL&industry=restaurant&count=5",
+            f"discovery/generate?workspace_id={self.workspace_id}&location=Miami, FL&industry=restaurant&source=google_maps&count=5",
             200
         )
 
@@ -203,19 +267,41 @@ class AutoMerchantAPITester:
             self.log_result("Dashboard Stats", False, "No token available")
             return False, {}
 
-        return self.run_test("Dashboard Stats", "GET", "dashboard/stats", 200)
+        # Test global stats
+        success1, _ = self.run_test("Dashboard Stats (Global)", "GET", "dashboard/stats", 200)
+        
+        # Test workspace-specific stats
+        success2 = True
+        if hasattr(self, 'workspace_id'):
+            success2, _ = self.run_test(
+                "Dashboard Stats (Workspace)", 
+                "GET", 
+                f"dashboard/stats?workspace_id={self.workspace_id}", 
+                200
+            )
+        
+        return success1 and success2, {}
 
     def test_create_campaign(self):
-        """Test campaign creation"""
+        """Test campaign creation with workspace"""
         if not self.token:
             self.log_result("Create Campaign", False, "No token available")
             return False, {}
 
+        if not hasattr(self, 'workspace_id'):
+            self.log_result("Create Campaign", False, "No workspace ID available")
+            return False, {}
+
         campaign_data = {
+            "workspace_id": self.workspace_id,
             "name": "Test SMS Campaign",
             "campaign_type": "sms",
-            "target_industries": ["restaurant", "barbershop"],
-            "message_template": "Hi {owner_name}, we can help reduce your processing fees!"
+            "target_industries": ["restaurant"],
+            "target_locations": ["Miami, FL"],
+            "message_template": "Hi {{owner_name}}, we can help reduce your processing fees at {{business_name}}!",
+            "follow_up_enabled": True,
+            "ai_agent_enabled": True,
+            "status": "draft"
         }
 
         return self.run_test(
@@ -228,7 +314,7 @@ class AutoMerchantAPITester:
 
     def run_all_tests(self):
         """Run all API tests"""
-        print("🚀 Starting AutoMerchant AI API Tests...")
+        print("🚀 Starting AutoMerchant AI v2.0 API Tests...")
         print(f"Base URL: {self.base_url}")
         
         # Test API health
@@ -239,15 +325,23 @@ class AutoMerchantAPITester:
         self.test_login()
         self.test_auth_me()
         
-        # Test leads functionality
-        self.test_create_lead()
-        self.test_list_leads() 
-        self.test_generate_leads()
+        # Test industry templates
+        self.test_get_industries()
         
-        # Test dashboard
+        # Test workspace functionality
+        self.test_create_workspace()
+        self.test_get_workspaces()
+        self.test_get_workspace_detail()
+        
+        # Test leads functionality (with workspace)
+        self.test_create_lead()
+        self.test_list_leads()
+        self.test_discovery_generate()
+        
+        # Test dashboard (global and workspace-specific)
         self.test_dashboard_stats()
         
-        # Test campaigns
+        # Test campaigns (with workspace)
         self.test_create_campaign()
         
         # Print final results
