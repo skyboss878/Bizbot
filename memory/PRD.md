@@ -1,92 +1,120 @@
-# AutoMerchant AI - Product Requirements Document
+# AutoMerchant AI v2.0 - Product Requirements Document
 
 ## Original Problem Statement
-Build a full production SaaS called "AutoMerchant AI" - an AI-powered merchant services sales agent that can find leads, contact them, follow up automatically, analyze merchant statements, and close deals for payment processing with cash discount / zero-fee processing programs.
+Build a full production SaaS called "AutoMerchant AI" that can run AI-powered sales campaigns for ANY business type. The system includes multi-workspace support, industry templates, autonomous lead discovery, multi-channel outreach, and AI-powered document analysis.
 
 ## User Personas
-1. **ISO Sales Agent** - Uses the platform to automate lead generation and outreach
-2. **ISO Manager** - Monitors team performance and deals via dashboard
-3. **Payment Processing Company** - Tracks residual revenue and merchant acquisition
-
-## Core Requirements (Static)
-- Autonomous lead generation from multiple sources
-- AI-powered lead qualification and scoring
-- Multi-channel outreach (SMS, Email, Voice)
-- Merchant statement analysis
-- CRM pipeline management
-- Analytics and reporting dashboard
-- SaaS subscription model
+1. **ISO Sales Agent** - Runs merchant services campaigns
+2. **Real Estate Agent** - Uses for buyer/seller lead generation
+3. **Insurance Agent** - Runs insurance product campaigns
+4. **SaaS Sales Rep** - B2B software outreach
+5. **Home Services Contractor** - Local service lead gen
+6. **Agency Owner** - Manages multiple campaigns for clients
 
 ## Technical Stack
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
+- **Frontend**: React + Tailwind CSS + Shadcn/UI + Framer Motion
 - **Backend**: FastAPI + MongoDB
-- **Integrations Planned**: Claude AI, Twilio SMS, SendGrid Email, Google Maps API, VAPI Voice
+- **Planned Integrations**: Claude AI, Twilio SMS, SendGrid Email, Google Maps API, VAPI Voice, ElevenLabs
 
 ---
 
-## What's Been Implemented (MVP) - March 2026
+## What's Been Implemented (v2.0) - March 2026
 
-### Phase 1 Complete:
+### Phase 1 - Core Platform:
 - [x] JWT Authentication (register, login, protected routes)
-- [x] Lead Management System with scoring algorithm
-- [x] AI Lead Generation (simulated - generates mock leads by city/industry)
-- [x] Pipeline Management (6 stages: New → Contacted → Interested → Statement Received → Proposal Sent → Closed)
-- [x] Conversation Tracking (SMS, Email, Voice channels)
-- [x] Merchant Statement Upload & Analysis (PDF parsing)
-- [x] Campaign Management System
-- [x] Dashboard with KPIs and AI Activity Feed
-- [x] Analytics with Charts (Sales Funnel, Pipeline Distribution, Revenue Growth)
-- [x] Settings (Profile, Integrations, Notifications, Billing plans)
+- [x] Multi-workspace system with industry templates
+- [x] 11 Pre-built industries with scoring rules, message templates, AI prompts
 
-### UI/UX Implemented:
-- Dark theme dashboard with Barlow Condensed / Manrope fonts
-- Electric Blue (#3B82F6) and Cyber Violet (#8B5CF6) accent colors
-- Grid texture backgrounds
-- Responsive sidebar navigation
-- Real-time AI Agent Activity indicator
+### Phase 2 - Industry Templates:
+Industries implemented:
+1. Merchant Services (payment processing)
+2. Real Estate (property listings)
+3. Insurance (business/personal insurance)
+4. SaaS / Software (B2B tech sales)
+5. Home Services (HVAC, plumbing, roofing)
+6. Professional Services (lawyers, accountants)
+7. Restaurant (food service)
+8. Retail (stores, boutiques)
+9. Medical / Dental (healthcare)
+10. Automotive (repair, dealerships)
+11. Beauty & Salons (hair, spa, nails)
+
+Each includes:
+- Custom lead scoring rules
+- SMS/Email message templates
+- AI conversation prompts
+- Follow-up schedules
+
+### Phase 3 - Lead Discovery Engine:
+- [x] AI Lead Discovery with location/source selection
+- [x] Multiple source support (Google Maps, Yelp, Facebook, LinkedIn, Instagram, Yellow Pages, Chamber)
+- [x] Lead enrichment with estimated revenue, company size, social profiles
+- [x] Smart lead scoring based on industry-specific rules
+
+### Phase 4 - Campaign System:
+- [x] Workspace-scoped campaigns
+- [x] Multi-channel support (SMS, Email, Voice)
+- [x] AI agent toggle for automated conversations
+- [x] Auto follow-up scheduling
+
+### Phase 5 - Dashboard & Analytics:
+- [x] Workspace-filtered dashboard stats
+- [x] Real-time AI Agent Activity feed
+- [x] Pipeline visualization
+- [x] Conversion analytics
 
 ---
 
 ## MOCKED APIs (To Be Integrated with Real APIs)
-- **Twilio SMS**: Message sending is simulated, no real SMS sent
-- **SendGrid Email**: Email sending is simulated, no real emails sent
-- **Google Maps API**: Lead generation uses mock data, not real business search
-- **Claude AI**: Statement analysis uses regex extraction, not AI
-- **VAPI Voice**: Voice calling not yet integrated
+- **Lead Discovery Sources**: Simulated data generation (not real Google Maps/Yelp/etc)
+- **Claude AI**: Statement analysis uses regex (not AI)
+- **Twilio SMS**: Message sending simulated
+- **SendGrid Email**: Email sending simulated
+- **VAPI Voice**: Voice calling not integrated
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical (Next Sprint)
-- [ ] Integrate Claude Sonnet 4.5 for AI-powered statement analysis
+### P0 - Critical (Required for Production)
+- [ ] Integrate Claude Sonnet 4.5 for AI conversations
 - [ ] Integrate Twilio SMS for real message sending/receiving
 - [ ] Integrate SendGrid for email outreach
 - [ ] Add webhook handlers for SMS/Email replies
 
 ### P1 - High Priority
-- [ ] Google Maps Places API integration for real lead scraping
-- [ ] Automated follow-up scheduler (background workers)
-- [ ] VAPI + ElevenLabs voice agent integration
-- [ ] Redis job queue setup for background automation
+- [ ] Google Maps Places API for real lead discovery
+- [ ] Automated background workers (Celery + Redis)
+- [ ] VAPI + ElevenLabs voice agent
+- [ ] Landing page generator per workspace
 
 ### P2 - Medium Priority
-- [ ] Stripe subscription integration
-- [ ] Team management (multiple users per account)
-- [ ] White-label customization
-- [ ] Landing page generator
+- [ ] Stripe subscription billing ($97/$297/$997 tiers)
+- [ ] Team management (multi-user per account)
+- [ ] Custom AI prompt training per workspace
+- [ ] SEO landing pages (/restaurants-zero-fee-processing)
 
 ### P3 - Low Priority
-- [ ] Social media post generator
-- [ ] Email campaign analytics
-- [ ] Competitor processor detection
-- [ ] Residual commission tracking
+- [ ] Social media content generator
+- [ ] Blog post auto-generation
+- [ ] Competitor detection
+- [ ] White-label customization
 
 ---
 
-## Next Tasks List
-1. Request API keys from user (Anthropic, Twilio, SendGrid, Google Maps)
-2. Implement Claude AI for statement analysis
+## API Keys Required for Full Production
+1. **Anthropic** - Claude Sonnet 4.5 API key
+2. **Twilio** - Account SID + Auth Token + Phone Number
+3. **SendGrid** - API Key
+4. **Google Maps** - Places API Key
+5. **VAPI** - API Key for voice agent
+6. **ElevenLabs** - API Key for voice synthesis
+
+---
+
+## Next Tasks
+1. Request API keys from user for production integrations
+2. Implement Claude AI conversation engine
 3. Add real SMS sending via Twilio
-4. Create background worker system with Celery/Redis
-5. Implement automated follow-up sequences
+4. Create background worker system for automated follow-ups
+5. Build landing page generator for SEO pages
