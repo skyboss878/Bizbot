@@ -200,12 +200,12 @@ const Conversations = () => {
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={channelFilter} onValueChange={setChannelFilter}>
+            <Select value={channelFilter || "all"} onValueChange={(v) => setChannelFilter(v === "all" ? "" : v)}>
               <SelectTrigger className="w-48 bg-background border-border rounded-none" data-testid="channel-filter">
                 <SelectValue placeholder="All Channels" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Channels</SelectItem>
+                <SelectItem value="all">All Channels</SelectItem>
                 <SelectItem value="sms">SMS</SelectItem>
                 <SelectItem value="email">Email</SelectItem>
                 <SelectItem value="voice">Voice</SelectItem>
