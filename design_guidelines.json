@@ -1,0 +1,167 @@
+{
+  "brand_identity": {
+    "name": "AutoMerchant AI",
+    "archetype": "The Performance Pro",
+    "emotional_tone": "Dominant, Efficient, High-Tech, Relentless, Professional",
+    "mission": "Automate the entire merchant services sales cycle with ruthless efficiency.",
+    "theme_preference": "dark"
+  },
+  "typography": {
+    "headings": {
+      "family": "Barlow Condensed, sans-serif",
+      "weights": [600, 700, 800],
+      "usage": "All section headers, metrics, and key data points.",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "family": "Manrope, sans-serif",
+      "weights": [400, 500, 600],
+      "usage": "General UI text, tables, form inputs.",
+      "features": "Tabular figures for data tables."
+    },
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600&display=swap"
+  },
+  "colors": {
+    "palette": {
+      "background": {
+        "default": "#050505",
+        "paper": "#121212",
+        "subtle": "#18181b"
+      },
+      "primary": {
+        "main": "#3B82F6",
+        "light": "#60A5FA",
+        "dark": "#2563EB",
+        "foreground": "#FFFFFF"
+      },
+      "secondary": {
+        "main": "#8B5CF6",
+        "light": "#A78BFA",
+        "dark": "#7C3AED",
+        "foreground": "#FFFFFF"
+      },
+      "success": {
+        "main": "#10B981",
+        "foreground": "#FFFFFF"
+      },
+      "warning": {
+        "main": "#F59E0B",
+        "foreground": "#000000"
+      },
+      "error": {
+        "main": "#F43F5E",
+        "foreground": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#F9FAFB",
+        "secondary": "#9CA3AF",
+        "disabled": "#4B5563"
+      },
+      "border": {
+        "default": "#27272A",
+        "active": "#3F3F46"
+      }
+    },
+    "gradients": {
+      "ai_active": "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+      "success_glow": "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0) 100%)",
+      "glass_surface": "linear-gradient(180deg, rgba(24, 24, 27, 0.6) 0%, rgba(24, 24, 27, 0.8) 100%)"
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid (Mode B: High Density)",
+    "spacing": {
+      "base": "0.25rem",
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "gap": "gap-4 md:gap-6",
+      "section_spacing": "py-16 md:py-24"
+    },
+    "radius": {
+      "default": "rounded-sm",
+      "card": "rounded-md",
+      "button": "rounded-none"
+    },
+    "containers": {
+      "dashboard_card": "bg-card border border-border/40 shadow-sm hover:border-primary/50 transition-colors duration-300",
+      "glass_panel": "backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.24)]"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider rounded-none px-6 py-3 shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all active:scale-[0.98]",
+      "secondary": "bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/50 font-semibold uppercase tracking-wide rounded-none px-6 py-3 transition-all",
+      "ghost": "hover:bg-white/5 text-gray-400 hover:text-white transition-colors uppercase tracking-wide rounded-none"
+    },
+    "cards": {
+      "metric": "bg-card border border-border p-6 relative overflow-hidden group hover:shadow-lg hover:shadow-primary/10 transition-all",
+      "lead": "bg-card border-l-4 border-l-transparent hover:border-l-primary transition-all p-4 border-y border-r border-border"
+    },
+    "inputs": {
+      "default": "bg-background border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-none h-12"
+    },
+    "status_indicators": {
+      "live": "animate-pulse bg-red-500 h-2 w-2 rounded-full inline-block mr-2",
+      "online": "bg-green-500 h-2 w-2 rounded-full inline-block mr-2",
+      "working": "animate-spin border-2 border-primary border-t-transparent h-4 w-4 rounded-full inline-block"
+    }
+  },
+  "visual_enhancers": {
+    "textures": {
+      "noise": "url('data:image/svg+xml,...') opacity-5 mix-blend-overlay pointer-events-none fixed inset-0 z-50",
+      "grid_lines": "bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+    },
+    "effects": {
+      "tracing_beam": "Use for 'Active Call' or 'Hot Lead' cards. A glowing gradient border that moves.",
+      "glassmorphism": "Use for Sidebar and Sticky Header only. Keep data panels solid for readability.",
+      "glow": "Box-shadows with colored transparency (e.g., shadow-blue-500/20) for primary actions."
+    }
+  },
+  "motion": {
+    "philosophy": "Precision and Speed. No bouncy springs. Snappy eases.",
+    "transitions": {
+      "page": "initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2, ease: 'easeOut' }}",
+      "hover": "transition-all duration-200 ease-in-out",
+      "list_item": "staggered entrance with 0.05s delay"
+    },
+    "libraries": [
+      "framer-motion (mandatory)",
+      "react-countup (for metrics)"
+    ]
+  },
+  "assets": {
+    "images": {
+      "login_bg": {
+        "url": "https://images.pexels.com/photos/28428591/pexels-photo-28428591.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Abstract Blue Data Tech Background"
+      },
+      "leads": [
+        {
+          "url": "https://images.pexels.com/photos/33964550/pexels-photo-33964550.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+          "alt": "Cafe Exterior"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1765009433753-c7462637d21f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxyZXRhaWwlMjBjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzczMTU4Mzk2fDA&ixlib=rb-4.1.0&q=85",
+          "alt": "Retail Store Interior"
+        }
+      ],
+      "avatars": [
+        "https://images.pexels.com/photos/34129721/pexels-photo-34129721.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "https://images.pexels.com/photos/33871730/pexels-photo-33871730.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      ]
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px or 2px. Clean, technical."
+    }
+  },
+  "universal_guidelines": [
+    "Use Dark Mode by default. The dashboard is for power users working long hours.",
+    "Data Density: Don't waste space. Use 'Bento' Mode B. Compact rows, clear columns.",
+    "Status Visibility: Every lead must have a clear visual status (New, Contacted, Analyzing, Closed).",
+    "AI Transparency: When AI is working (calling, emailing), show a visual indicator (pulsing dot, progress bar, or log stream).",
+    "No Gradients on Text: Keep text high-contrast white or light gray. Use gradients only on borders or icon backgrounds.",
+    "Sharp Edges: Prefer 'rounded-sm' or 'rounded-none' over 'rounded-xl' to convey precision and finance.",
+    "Dashboard Hierarchy: 1. Critical Alerts (Calls/Errors) -> 2. KPI Metrics -> 3. Active Pipeline -> 4. Activity Feed.",
+    "Navigation: Sidebar navigation is mandatory for this app type. Collapsible for more screen real estate."
+  ]
+}
