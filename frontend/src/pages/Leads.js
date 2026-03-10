@@ -479,23 +479,23 @@ const Leads = () => {
                 data-testid="leads-search"
               />
             </div>
-            <Select value={filterStage} onValueChange={setFilterStage}>
+            <Select value={filterStage || "all"} onValueChange={(v) => setFilterStage(v === "all" ? "" : v)}>
               <SelectTrigger className="w-full md:w-48 bg-background border-border rounded-none" data-testid="filter-stage">
                 <SelectValue placeholder="All Stages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Stages</SelectItem>
+                <SelectItem value="all">All Stages</SelectItem>
                 {pipelineStages.map((stage) => (
                   <SelectItem key={stage.value} value={stage.value}>{stage.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filterIndustry} onValueChange={setFilterIndustry}>
+            <Select value={filterIndustry || "all"} onValueChange={(v) => setFilterIndustry(v === "all" ? "" : v)}>
               <SelectTrigger className="w-full md:w-48 bg-background border-border rounded-none" data-testid="filter-industry">
                 <SelectValue placeholder="All Industries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Industries</SelectItem>
+                <SelectItem value="all">All Industries</SelectItem>
                 {industries.map((ind) => (
                   <SelectItem key={ind} value={ind.toLowerCase()}>{ind}</SelectItem>
                 ))}
