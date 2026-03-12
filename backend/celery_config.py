@@ -11,6 +11,11 @@ load_dotenv()
 # Redis URL for Celery broker and backend
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
+# SSL options for Upstash Redis
+REDIS_SSL_OPTS = {
+    "ssl_cert_reqs": "CERT_NONE"
+} if REDIS_URL.startswith("rediss://") else {}
+
 # Create Celery app
 celery_app = Celery(
     'automerchant',
@@ -18,6 +23,9 @@ celery_app = Celery(
     backend=REDIS_URL,
     include=['tasks.lead_discovery', 'tasks.outreach', 'tasks.followup', 'tasks.enrichment']
 )
+
+celery_app.conf.broker_transport_options = REDIS_SSL_OPTS
+celery_app.conf.redis_backend_use_ssl = REDIS_SSL_OPTS
 
 # Celery Configuration
 celery_app.conf.update(

@@ -1,7 +1,14 @@
+import dns.resolver
+dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
+dns.resolver.default_resolver.nameservers = ["8.8.8.8", "8.8.4.4"]
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, BackgroundTasks, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+import dns.resolver
+import dns.rdatatype
+dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
+dns.resolver.default_resolver.nameservers = ["8.8.8.8","8.8.4.4"]
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -907,6 +914,61 @@ async def delete_lead(lead_id: str, current_user: dict = Depends(get_current_use
 
 # ==================== LEAD DISCOVERY ENGINE ====================
 
+INDUSTRY_SEARCH_TERMS = {
+    "merchant_services": "retail business",
+    "real_estate": "real estate agency",
+    "insurance": "insurance agency",
+    "saas_software": "software company",
+    "home_services": "home services contractor",
+    "professional_services": "law firm consulting accounting",
+    "restaurant": "restaurant",
+    "retail": "retail store",
+    "medical_dental": "medical clinic dental office",
+    "automotive": "auto repair shop",
+    "auto_repair": "auto repair shop",
+    "beauty_salon": "beauty salon",
+    "barbershop": "barbershop",
+    "nail_salon": "nail salon",
+    "hair_salon": "hair salon",
+    "spa": "day spa",
+    "car_wash": "car wash",
+    "smoke_shop": "smoke shop tobacco",
+    "liquor_store": "liquor store",
+    "convenience_store": "convenience store",
+    "other": "local business",
+}
+
+def fetch_places_sync(query: str, location: str, count: int = 20) -> list:
+    import httpx, time
+    key = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+    if not key:
+        raise ValueError("GOOGLE_PLACES_API_KEY not set")
+    url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    detail_url = "https://maps.googleapis.com/maps/api/place/details/json"
+    results = []
+    params = {"query": f"{query} in {location}", "key": key}
+    while len(results) < count:
+        r = httpx.get(url, params=params, timeout=10)
+        data = r.json()
+        if data.get("status") not in ("OK", "ZERO_RESULTS"):
+            raise Exception(f"Places API: {data.get('status')} - {data.get('error_message','')}")
+        for place in data.get("results", []):
+            pid = place.get("place_id")
+            detail = {}
+            if pid:
+                try:
+                    dr = httpx.get(detail_url, params={"place_id": pid, "fields": "name,formatted_phone_number,website,formatted_address,rating,user_ratings_total,business_status", "key": key}, timeout=10)
+                    detail = dr.json().get("result", {})
+                except: pass
+            place["_detail"] = detail
+            results.append(place)
+        token = data.get("next_page_token")
+        if not token or len(results) >= count:
+            break
+        time.sleep(2)
+        params = {"pagetoken": token, "key": key}
+    return results[:count]
+
 @api_router.post("/discovery/generate")
 async def generate_leads(
     workspace_id: str,
@@ -916,96 +978,46 @@ async def generate_leads(
     count: int = Query(default=10, le=50),
     current_user: dict = Depends(get_current_user)
 ):
-    """Generate simulated leads from discovery engine"""
-    # Verify workspace
+    """Discover REAL leads from Google Places API"""
     workspace = await db.workspaces.find_one(
-        {"id": workspace_id, "user_id": current_user["id"]},
-        {"_id": 0}
+        {"id": workspace_id, "user_id": current_user["id"]}, {"_id": 0}
     )
     if not workspace:
         raise HTTPException(status_code=404, detail="Workspace not found")
-    
-    # Industry-specific business name patterns
-    name_patterns = {
-        "restaurant": ["Grill", "Bistro", "Kitchen", "Cafe", "Diner", "Pizzeria", "Tavern", "Bar & Grill"],
-        "real_estate": ["Realty", "Properties", "Real Estate Group", "Homes", "Realtors", "Property Group"],
-        "insurance": ["Insurance Agency", "Insurance Services", "Insurance Group", "Risk Solutions"],
-        "saas_software": ["Tech", "Software", "Solutions", "Systems", "Digital", "Cloud", "AI"],
-        "home_services": ["Services", "Solutions", "Pros", "Experts", "Co", "& Sons", "Contractors"],
-        "professional_services": ["& Associates", "Law Firm", "CPA", "Consulting", "Advisors", "Group"],
-        "retail": ["Shop", "Store", "Boutique", "Market", "Emporium", "Outlet"],
-        "medical_dental": ["Medical Center", "Clinic", "Health", "Dental", "Family Practice", "Care"],
-        "automotive": ["Auto", "Automotive", "Motors", "Car Care", "Service Center", "Garage"],
-        "beauty_salon": ["Salon", "Spa", "Beauty", "Studio", "Hair", "Nails", "Barber"]
-    }
-    
-    prefixes = ["Premier", "Elite", "Classic", "Modern", "Golden", "Downtown", "Metro", "Quality", "Best", "Top", "Local", "City", "Express"]
-    first_names = ["John", "Mike", "Sarah", "David", "Lisa", "James", "Maria", "Robert", "Jennifer", "Michael", "Jessica", "Chris", "Amanda", "Kevin"]
-    last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Wilson", "Anderson"]
-    
-    suffixes = name_patterns.get(industry.lower().replace(" ", "_").replace("/", "_"), ["Business", "Company", "Services"])
-    
-    city, state = location.split(",") if "," in location else (location, "CA")
-    city = city.strip()
-    state = state.strip()
-    
-    generated_leads = []
-    for i in range(count):
-        business_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
-        owner_name = f"{random.choice(first_names)} {random.choice(last_names)}"
-        
-        # Clean names for email/website
-        email_name = owner_name.lower().replace(' ', '.')
-        clean_business = business_name.lower().replace(' ', '').replace("'", '').replace("&", "")[:12]
-        
-        # Estimate revenue based on industry
-        revenue_ranges = {
-            "restaurant": (300000, 2000000),
-            "real_estate": (100000, 500000),
-            "insurance": (200000, 1000000),
-            "saas_software": (500000, 5000000),
-            "home_services": (150000, 800000),
-            "professional_services": (200000, 2000000),
-            "retail": (200000, 1500000),
-            "medical_dental": (500000, 3000000),
-            "automotive": (300000, 1500000),
-            "beauty_salon": (100000, 500000)
+    search_term = INDUSTRY_SEARCH_TERMS.get(industry.lower().replace(" ","_").replace("/","_"), industry)
+    import asyncio
+    loop = asyncio.get_event_loop()
+    try:
+        places = await loop.run_in_executor(None, fetch_places_sync, search_term, location, count)
+    except Exception as e:
+        import traceback
+        logger.error(f"Places error: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Google Places error: {str(e)}")
+    now = datetime.now(timezone.utc).isoformat()
+    saved = []
+    for place in places:
+        detail = place.get("_detail", {})
+        addr = detail.get("formatted_address") or place.get("formatted_address","")
+        parts = addr.split(",")
+        city_val = parts[-3].strip() if len(parts)>=3 else location.split(",")[0].strip()
+        state_val = parts[-2].strip().split(" ")[0] if len(parts)>=2 else "CA"
+        lead_id = str(uuid.uuid4())
+        lead_doc = {
+            "id": lead_id, "workspace_id": workspace_id, "user_id": current_user["id"],
+            "business_name": place.get("name",""), "owner_name": None,
+            "phone": detail.get("formatted_phone_number"), "email": None,
+            "website": detail.get("website"), "industry": industry,
+            "address": addr, "city": city_val, "state": state_val,
+            "google_rating": place.get("rating"), "review_count": place.get("user_ratings_total"),
+            "social_profiles": None, "estimated_revenue": None, "company_size": None,
+            "source": source, "pipeline_stage": "new", "place_id": place.get("place_id"),
+            "score": 0, "created_at": now, "updated_at": now
         }
-        rev_range = revenue_ranges.get(industry.lower().replace(" ", "_").replace("/", "_"), (100000, 500000))
-        
-        lead_data = LeadCreate(
-            workspace_id=workspace_id,
-            business_name=business_name,
-            owner_name=owner_name,
-            phone=f"+1{random.randint(200,999)}{random.randint(200,999)}{random.randint(1000,9999)}",
-            email=f"{email_name}@{clean_business}.com",
-            website=f"www.{clean_business}.com",
-            industry=industry,
-            city=city,
-            state=state,
-            google_rating=round(random.uniform(3.5, 5.0), 1),
-            review_count=random.randint(10, 300),
-            estimated_revenue=random.randint(rev_range[0], rev_range[1]),
-            company_size=random.choice(["1-10", "11-50", "51-200", "201-500"]),
-            social_profiles={
-                "facebook": f"facebook.com/{clean_business}",
-                "instagram": f"@{clean_business}"
-            } if random.random() > 0.3 else None,
-            source=source
-        )
-        
-        lead = await create_lead(lead_data, current_user)
-        generated_leads.append(lead)
-    
-    await log_ai_activity(
-        workspace_id,
-        "lead_discovery",
-        None,
-        f"Discovered {count} {industry} leads in {location} from {source}",
-        "completed"
-    )
-    
-    return {"message": f"Generated {count} leads", "leads": generated_leads}
+        lead_doc["score"] = calculate_lead_score(lead_doc, workspace.get("scoring_rules",{}))
+        await db.leads.insert_one(lead_doc)
+        saved.append(LeadResponse(**lead_doc))
+    await log_ai_activity(workspace_id,"lead_discovery",None,f"Discovered {len(saved)} real {industry} leads in {location}","completed")
+    return {"message": f"Discovered {len(saved)} real leads", "leads": saved}
 
 @api_router.post("/discovery/configure")
 async def configure_discovery(config: LeadDiscoveryConfig, current_user: dict = Depends(get_current_user)):
@@ -1420,6 +1432,25 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
+
+@api_router.post("/leads/generate")
+async def generate_leads_alias(
+    city: str,
+    state: str,
+    industry: str,
+    count: int = Query(default=10, le=50),
+    current_user: dict = Depends(get_current_user)
+):
+    """Real lead generation from Leads page via Google Places"""
+    location = f"{city.strip()}, {state.strip()}"
+    workspaces = await db.workspaces.find(
+        {"user_id": current_user["id"]}, {"_id": 0}
+    ).limit(1).to_list(1)
+    workspace_id = workspaces[0]["id"] if workspaces else None
+    if not workspace_id:
+        raise HTTPException(status_code=404, detail="Create a workspace first")
+    return await generate_leads(workspace_id, location, industry, "google_maps", count, current_user)
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -1434,3 +1465,24 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+@api_router.post("/leads/generate")
+async def generate_leads_simple(
+    city: str,
+    state: str,
+    industry: str,
+    count: int = Query(default=10, le=50),
+    current_user: dict = Depends(get_current_user)
+):
+    """Alias route for lead generation from Leads page"""
+    location = f"{city}, {state}"
+    workspaces = await db.workspaces.find(
+        {"user_id": current_user["id"], "industry": industry},
+        {"_id": 0}
+    ).limit(1).to_list(1)
+    
+    if not workspaces:
+        raise HTTPException(status_code=404, detail="No workspace found for this industry. Create a workspace first.")
+    
+    workspace_id = workspaces[0]["id"]
+    return await generate_leads(workspace_id, location, industry, "google_maps", count, current_user)

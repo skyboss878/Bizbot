@@ -47,15 +47,25 @@ const API = `${BACKEND_URL}/api`;
 
 const industries = [
   'Restaurant',
+  'Retail',
+  'Auto Repair',
+  'Beauty Salon',
   'Barbershop',
   'Nail Salon',
-  'Auto Repair',
+  'Hair Salon',
+  'Spa',
+  'Car Wash',
   'Smoke Shop',
   'Liquor Store',
   'Convenience Store',
-  'Car Wash',
-  'Retail',
-  'Other'
+  'Medical Dental',
+  'Insurance',
+  'Real Estate',
+  'Home Services',
+  'Professional Services',
+  'Merchant Services',
+  'Automotive',
+  'Saas Software',
 ];
 
 const pipelineStages = [
