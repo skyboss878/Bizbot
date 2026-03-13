@@ -1457,6 +1457,12 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
     allow_credentials=True,
     allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
@@ -1466,24 +1472,3 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-
-@api_router.post("/leads/generate")
-async def generate_leads_simple(
-    city: str,
-    state: str,
-    industry: str,
-    count: int = Query(default=10, le=50),
-    current_user: dict = Depends(get_current_user)
-):
-    """Alias route for lead generation from Leads page"""
-    location = f"{city}, {state}"
-    workspaces = await db.workspaces.find(
-        {"user_id": current_user["id"], "industry": industry},
-        {"_id": 0}
-    ).limit(1).to_list(1)
-    
-    if not workspaces:
-        raise HTTPException(status_code=404, detail="No workspace found for this industry. Create a workspace first.")
-    
-    workspace_id = workspaces[0]["id"]
-    return await generate_leads(workspace_id, location, industry, "google_maps", count, current_user)
